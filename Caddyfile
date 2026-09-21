@@ -1,4 +1,8 @@
-192.168.88.24 {
+{
+    auto_https disable_redirects
+}
+
+192.168.88.24:8443 {
     tls internal 
     reverse_proxy localhost:5173
 }
