@@ -22,6 +22,7 @@
           buildInputs = with pkgs; [
             nodejs_24
             caddy
+            mprocs
           ];
 
           shellHook = ''

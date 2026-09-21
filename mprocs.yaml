@@ -1,0 +1,6 @@
+procs:
+  client:
+    cwd: react-capture-client
+    shell: npm run dev -- --host
+  proxy:
+    shell: caddy run --config Caddyfile
