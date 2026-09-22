@@ -1,0 +1,19 @@
+.hud-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.hud-header {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  z-index: 10;
+}
+
+.hud-title {
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 1);
+}
