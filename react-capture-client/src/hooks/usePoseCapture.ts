@@ -4,6 +4,7 @@ import {
   PoseLandmarker,
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
+import { formatMediaPipeData } from "../core/mediapipe/adapter.ts";
 
 export function usePoseCapture(
   videoRef: RefObject<HTMLVideoElement>,
@@ -76,6 +77,10 @@ export function usePoseCapture(
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         if (results.landmarks && results.landmarks.length > 0) {
+          const frameData = formatMediaPipeData(results.landmarks[0]);
+          if (Math.random() < 0.02) {
+            console.log("Готово к отправке: ", frameData);
+          }
           for (const landmark of results.landmarks) {
             drawingUtils.drawConnectors(
               landmark,
