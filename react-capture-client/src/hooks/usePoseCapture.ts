@@ -4,13 +4,15 @@ import {
   PoseLandmarker,
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
-import { formatMediaPipeData } from "../core/mediapipe/adapter.ts";
-import { POSE_MODELS, type ModelType } from "../core/mediapipe/config.ts";
+import { formatMediaPipeData } from "../core/mediapipe/adapter";
+import { POSE_MODELS, type ModelType } from "../core/mediapipe/config";
+import type { MocapFrame } from "../types";
 
 export function usePoseCapture(
   videoRef: RefObject<HTMLVideoElement>,
   canvasRef: RefObject<HTMLCanvasElement>,
   modelType: ModelType,
+  onFrame: (frame: MocapFrame) => void,
 ) {
   useEffect(() => {
     let animationFrameId: number;
@@ -79,9 +81,9 @@ export function usePoseCapture(
 
         if (results.landmarks && results.landmarks.length > 0) {
           const frameData = formatMediaPipeData(results.landmarks[0]);
-          if (Math.random() < 0.02) {
-            console.log("Готово к отправке: ", frameData);
-          }
+
+          onFrame(frameData);
+
           for (const landmark of results.landmarks) {
             drawingUtils.drawConnectors(
               landmark,
@@ -121,5 +123,5 @@ export function usePoseCapture(
         landmarker.close();
       }
     };
-  }, [videoRef, canvasRef, modelType]);
+  }, [videoRef, canvasRef, modelType, onFrame]);
 }
