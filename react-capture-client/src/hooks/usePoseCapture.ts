@@ -5,10 +5,12 @@ import {
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
 import { formatMediaPipeData } from "../core/mediapipe/adapter.ts";
+import { POSE_MODELS, type ModelType } from "../core/mediapipe/config.ts";
 
 export function usePoseCapture(
   videoRef: RefObject<HTMLVideoElement>,
   canvasRef: RefObject<HTMLCanvasElement>,
+  modelType: ModelType,
 ) {
   useEffect(() => {
     let animationFrameId: number;
@@ -23,8 +25,7 @@ export function usePoseCapture(
 
       landmarker = await PoseLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+          modelAssetPath: POSE_MODELS[modelType],
           delegate: "GPU",
         },
         runningMode: "VIDEO",
@@ -120,5 +121,5 @@ export function usePoseCapture(
         landmarker.close();
       }
     };
-  }, []);
+  }, [videoRef, canvasRef, modelType]);
 }
