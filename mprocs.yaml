@@ -1,4 +1,7 @@
 procs:
+  core: 
+    cwd: core
+    shell: cargo run
   client:
     cwd: react-capture-client
     shell: npm run dev -- --host
