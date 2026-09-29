@@ -23,7 +23,10 @@
             nodejs_24
             caddy
             mprocs
+            protobuf
           ];
+
+          PROTOC = "${pkgs.protobuf}/bin/protoc";
 
           shellHook = ''
             export PS1="(motion-bridge) $PS1"

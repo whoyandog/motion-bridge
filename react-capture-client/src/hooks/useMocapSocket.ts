@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { MocapFrame } from "../types";
 
 export function useMocapSocket(url: string) {
   const wsRef = useRef<WebSocket | null>(null);
@@ -7,6 +8,7 @@ export function useMocapSocket(url: string) {
   useEffect(() => {
     console.log(`Подключение к ${url}...`);
     const ws = new WebSocket(url);
+    ws.binaryType = "arraybuffer";
 
     ws.onopen = () => {
       console.log("WS: connected");
@@ -37,7 +39,8 @@ export function useMocapSocket(url: string) {
 
   const sendFrame = (frameData: any) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(frameData));
+      const bytes = MocapFrame.encode(frameData).finish();
+      wsRef.current.send(bytes);
     }
   };
 

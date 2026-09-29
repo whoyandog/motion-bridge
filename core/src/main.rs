@@ -4,6 +4,11 @@ use axum::{
     routing::get,
 };
 use futures::stream::StreamExt;
+use prost::Message as ProstMessage;
+
+pub mod mocap {
+    include!(concat!(env!("OUT_DIR"), "/mocap.rs"));
+}
 
 #[tokio::main]
 async fn main() {
@@ -25,11 +30,24 @@ async fn handle_socket(mut socket: WebSocket) {
     println!("Клиент подключен");
 
     while let Some(Ok(msg)) = socket.next().await {
-        if let Message::Text(text) = msg {
-            println!("Кадр: {}", text);
-        } else if let Message::Close(_) = msg {
-            println!("Клиент отключился");
-            break;
+        match msg {
+            Message::Binary(bytes) => match mocap::MocapFrame::decode(bytes) {
+                Ok(frame) => {
+                    println!(
+                        "Тип: {}, точек: {}",
+                        frame.skeleton_type,
+                        frame.landmarks.len()
+                    );
+                }
+                Err(e) => {
+                    eprintln!("Ошибка парсига protobuf: {}", e);
+                }
+            },
+            Message::Close(_) => {
+                println!("Клиент отключен");
+                break;
+            }
+            _ => {}
         }
     }
 }

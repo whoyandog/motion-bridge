@@ -6,7 +6,7 @@ export function formatMediaPipeData(
 ): MocapFrame {
   return {
     timestamp: Date.now(),
-    skeleton_type: "mediapipe_33",
+    skeletonType: "mediapipe_33",
     landmarks: rawLandmarks.map((lm, index) => ({
       id: index,
       x: lm.x,
