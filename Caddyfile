@@ -2,6 +2,10 @@
 	auto_https disable_redirects
 }
 
+http://192.168.88.24:8080 {
+    redir https://192.168.88.24:8443{uri}
+}
+
 192.168.88.24:8443 {
 	tls internal
 	reverse_proxy /ws localhost:3000
