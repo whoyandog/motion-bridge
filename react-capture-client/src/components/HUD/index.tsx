@@ -3,15 +3,18 @@ import "./HUD.css";
 
 export default function HUD() {
   const isConnected = useUIStore((state) => state.isConnected);
+  const fps = useUIStore((state) => state.fps);
 
   return (
-    <div className="hud-container">
-      <header className="hud-header">
-        <h1 className="hud-title">Motion bridge</h1>
-        <span style={{ color: isConnected ? "#00FF00" : "#FF0000" }}>
+    <header className="hud-overlay">
+      <div className="left-panel">
+        <h1>Motion bridge</h1>
+        <div className={`status ${isConnected ? "online" : "offline"}`}>
           {isConnected ? "Online" : "Offline"}
-        </span>
-      </header>
-    </div>
+        </div>
+      </div>
+
+      <div className="right-panel">FPS: {fps}</div>
+    </header>
   );
 }

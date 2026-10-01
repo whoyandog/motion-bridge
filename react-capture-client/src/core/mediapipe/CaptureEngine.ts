@@ -6,12 +6,16 @@ import {
 import { formatMediaPipeData } from "./adapter";
 import { POSE_MODELS, type ModelType } from "./config";
 import { SocketEngine } from "../network/SocketEngine";
+import { useUIStore } from "../../store/uiStore";
 
 export class CaptureEngine {
   private static landmarker: PoseLandmarker | null = null;
   private static active = false;
   private static animationFrameId: number;
   private static lastVideoTime = -1;
+
+  private static framesThisSecond = 0;
+  private static lastFpsUpdate = 0;
 
   static async start(
     video: HTMLVideoElement,
@@ -51,6 +55,8 @@ export class CaptureEngine {
       video.onloadedmetadata = () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        this.framesThisSecond = 0;
+        this.lastFpsUpdate = Date.now();
         video.play();
         this.predictWebcam(video, canvas);
       };
@@ -102,6 +108,18 @@ export class CaptureEngine {
         }
       }
       ctx.restore();
+
+      this.framesThisSecond++;
+      const elapsedMs = frameTimestamp - this.lastFpsUpdate;
+      if (elapsedMs >= 200) {
+        const currentFps = Math.round(
+          (this.framesThisSecond / elapsedMs) * 1000,
+        );
+        useUIStore.getState().setFps(currentFps);
+
+        this.framesThisSecond = 0;
+        this.lastFpsUpdate = frameTimestamp;
+      }
     }
 
     if (this.active) {
@@ -123,5 +141,6 @@ export class CaptureEngine {
       this.landmarker.close();
       this.landmarker = null;
     }
+    useUIStore.getState().setFps(0);
   }
 }
