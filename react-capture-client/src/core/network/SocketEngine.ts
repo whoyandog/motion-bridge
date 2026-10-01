@@ -1,5 +1,5 @@
 import { useUIStore } from "../../store/uiStore";
-import { MocapFrame } from "../../types";
+import { MocapFrame } from "../../types/schema";
 
 export class SocketEngine {
   private static ws: WebSocket | null = null;

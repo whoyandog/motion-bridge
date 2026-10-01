@@ -1,4 +1,4 @@
-import type { MocapFrame } from "../types";
+import type { MocapFrame } from "../types/schema";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 export function formatMediaPipeData(
