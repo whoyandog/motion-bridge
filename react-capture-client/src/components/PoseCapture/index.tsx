@@ -1,22 +1,29 @@
-import { useRef } from "react";
-import { usePoseCapture } from "../../hooks/usePoseCapture";
+import { useEffect, useRef } from "react";
+import { CaptureEngine } from "../../core/mediapipe/CaptureEngine";
+import { SocketEngine } from "../../core/network/SocketEngine";
 import type { ModelType } from "../../core/mediapipe/config";
-import type { MocapFrame } from "../../types";
 import "./PoseCapture.css";
 
 interface PoseCaptureProps {
   modelType?: ModelType;
-  onFrame: (frame: MocapFrame) => void;
 }
 
-export default function PoseCapture({
-  modelType = "lite",
-  onFrame,
-}: PoseCaptureProps) {
+export default function PoseCapture({ modelType = "lite" }: PoseCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  usePoseCapture(videoRef, canvasRef, modelType, onFrame);
+  useEffect(() => {
+    SocketEngine.connect("wss://192.168.88.24:8443/ws");
+
+    if (videoRef.current && canvasRef.current) {
+      CaptureEngine.start(videoRef.current, canvasRef.current, modelType);
+    }
+
+    return () => {
+      if (videoRef.current) CaptureEngine.stop(videoRef.current);
+      SocketEngine.disconnect();
+    };
+  }, [modelType]);
 
   return (
     <div className="capture-container">
