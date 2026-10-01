@@ -68,6 +68,7 @@ export class CaptureEngine {
     const ctx = canvas.getContext("2d");
     if (ctx && video.currentTime !== this.lastVideoTime) {
       this.lastVideoTime = video.currentTime;
+      const frameTimestamp = Date.now();
       const startTimeMs = performance.now();
       const results = this.landmarker.detectForVideo(video, startTimeMs);
 
@@ -76,7 +77,10 @@ export class CaptureEngine {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       if (results.landmarks && results.landmarks.length > 0) {
-        const frameData = formatMediaPipeData(results.landmarks[0]);
+        const frameData = formatMediaPipeData(
+          results.landmarks[0],
+          frameTimestamp,
+        );
 
         SocketEngine.sendFrame(frameData);
 

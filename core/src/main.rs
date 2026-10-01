@@ -34,9 +34,10 @@ async fn handle_socket(mut socket: WebSocket) {
             Message::Binary(bytes) => match mocap::MocapFrame::decode(bytes) {
                 Ok(frame) => {
                     println!(
-                        "Тип: {}, точек: {}",
+                        "Тип: {}, точек: {}, время: {}",
                         frame.skeleton_type,
-                        frame.landmarks.len()
+                        frame.landmarks.len(),
+                        frame.timestamp
                     );
                 }
                 Err(e) => {

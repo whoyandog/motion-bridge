@@ -3,9 +3,10 @@ import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 export function formatMediaPipeData(
   rawLandmarks: NormalizedLandmark[],
+  timestamp: number,
 ): MocapFrame {
   return {
-    timestamp: Date.now(),
+    timestamp,
     skeletonType: "mediapipe_33",
     landmarks: rawLandmarks.map((lm, index) => ({
       id: index,
