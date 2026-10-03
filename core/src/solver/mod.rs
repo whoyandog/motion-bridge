@@ -1,4 +1,4 @@
-use crate::mocap::MocapFrame;
+use crate::mocap::{BoneRotation, MocapFrame, SolverFrame};
 use glam::{Quat, Vec3};
 use tokio::sync::watch;
 
@@ -6,12 +6,18 @@ const LEFT_SHOULDER: usize = 11;
 const LEFT_ELBOW: usize = 13;
 const LEFT_WRIST: usize = 15;
 
-pub async fn run(mut rx_raw: watch::Receiver<Option<MocapFrame>>) {
+const GODOT_BONE_LEFT_UPPER_ARM: u32 = 1;
+const GODOT_BONE_LEFT_LOWER_ARM: u32 = 2;
+
+pub async fn run(
+    mut rx_raw: watch::Receiver<Option<MocapFrame>>,
+    tx_solved: watch::Sender<Option<SolverFrame>>,
+) {
     let default_bone_dir = Vec3::NEG_Y;
 
     loop {
         if rx_raw.changed().await.is_err() {
-            println!("[Solver] Канал rx_raw закрыт.");
+            println!("[Solver] Канал закрыт.");
             break;
         }
 
@@ -34,6 +40,31 @@ pub async fn run(mut rx_raw: watch::Receiver<Option<MocapFrame>>) {
                     Quat::from_rotation_arc(default_bone_dir, upper_left_arm_dir);
                 let lower_left_arm_quat =
                     Quat::from_rotation_arc(default_bone_dir, lower_left_arm_dir);
+
+                let solver_frame = SolverFrame {
+                    root_x: 0.0,
+                    root_y: 0.0,
+                    root_z: 0.0,
+                    timestamp: frame.timestamp,
+                    bones: vec![
+                        BoneRotation {
+                            bone_id: GODOT_BONE_LEFT_UPPER_ARM,
+                            qx: upper_left_arm_quat.x,
+                            qy: upper_left_arm_quat.y,
+                            qz: upper_left_arm_quat.z,
+                            qw: upper_left_arm_quat.w,
+                        },
+                        BoneRotation {
+                            bone_id: GODOT_BONE_LEFT_LOWER_ARM,
+                            qx: lower_left_arm_quat.x,
+                            qy: lower_left_arm_quat.y,
+                            qz: lower_left_arm_quat.z,
+                            qw: lower_left_arm_quat.w,
+                        },
+                    ],
+                };
+
+                let _ = tx_solved.send(Some(solver_frame));
 
                 println!(
                     "[Solver] Кватернион, верхняя часть: ({:.2}, {:.2}, {:.2}, {:.2}); нижняя часть: ({:.2}, {:.2}, {:.2}, {:.2})",

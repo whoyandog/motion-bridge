@@ -10,9 +10,14 @@ use tokio::sync::watch;
 #[tokio::main]
 async fn main() {
     let (tx_raw, rx_raw) = watch::channel(None);
+    let (tx_solved, rx_solved) = watch::channel(None);
 
     tokio::spawn(async move {
-        solver::run(rx_raw).await;
+        network::udp_client::start(rx_solved).await;
+    });
+
+    tokio::spawn(async move {
+        solver::run(rx_raw, tx_solved).await;
     });
 
     let app = network::ws_server::create_router(tx_raw);
