@@ -15,3 +15,19 @@ message MocapFrame {
   string skeleton_type = 2;
   repeated Point3D landmarks = 3;
 }
+
+message BoneRotation {
+  uint32 bone_id = 1;
+  float qx = 2;
+  float qy = 3;
+  float qz = 4;
+  float qw = 5;
+}
+
+message SolverFrame {
+  float root_x = 1;
+  float root_y = 2;
+  float root_z = 3;
+  repeated BoneRotation bones = 4;
+  uint64 timestamp = 5;
+}

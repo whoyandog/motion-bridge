@@ -23,6 +23,22 @@ export interface MocapFrame {
   landmarks: Point3D[];
 }
 
+export interface BoneRotation {
+  boneId: number;
+  qx: number;
+  qy: number;
+  qz: number;
+  qw: number;
+}
+
+export interface SolverFrame {
+  rootX: number;
+  rootY: number;
+  rootZ: number;
+  bones: BoneRotation[];
+  timestamp: number;
+}
+
 function createBasePoint3D(): Point3D {
   return { id: 0, x: 0, y: 0, z: 0, visibility: 0 };
 }
@@ -259,6 +275,288 @@ export const MocapFrame: MessageFns<MocapFrame> = {
     message.timestamp = object.timestamp ?? 0;
     message.skeletonType = object.skeletonType ?? "";
     message.landmarks = object.landmarks?.map((e) => Point3D.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseBoneRotation(): BoneRotation {
+  return { boneId: 0, qx: 0, qy: 0, qz: 0, qw: 0 };
+}
+
+export const BoneRotation: MessageFns<BoneRotation> = {
+  encode(message: BoneRotation, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.boneId !== 0) {
+      writer.uint32(8).uint32(message.boneId);
+    }
+    if (message.qx !== 0) {
+      writer.uint32(21).float(message.qx);
+    }
+    if (message.qy !== 0) {
+      writer.uint32(29).float(message.qy);
+    }
+    if (message.qz !== 0) {
+      writer.uint32(37).float(message.qz);
+    }
+    if (message.qw !== 0) {
+      writer.uint32(45).float(message.qw);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BoneRotation {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseBoneRotation();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 8) {
+              break;
+            }
+
+            message.boneId = reader.uint32();
+            continue;
+          }
+          case 2: {
+            if (tag !== 21) {
+              break;
+            }
+
+            message.qx = reader.float();
+            continue;
+          }
+          case 3: {
+            if (tag !== 29) {
+              break;
+            }
+
+            message.qy = reader.float();
+            continue;
+          }
+          case 4: {
+            if (tag !== 37) {
+              break;
+            }
+
+            message.qz = reader.float();
+            continue;
+          }
+          case 5: {
+            if (tag !== 45) {
+              break;
+            }
+
+            message.qw = reader.float();
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): BoneRotation {
+    return {
+      boneId: isSet(object.boneId)
+        ? globalThis.Number(object.boneId)
+        : isSet(object.bone_id)
+        ? globalThis.Number(object.bone_id)
+        : 0,
+      qx: isSet(object.qx) ? globalThis.Number(object.qx) : 0,
+      qy: isSet(object.qy) ? globalThis.Number(object.qy) : 0,
+      qz: isSet(object.qz) ? globalThis.Number(object.qz) : 0,
+      qw: isSet(object.qw) ? globalThis.Number(object.qw) : 0,
+    };
+  },
+
+  toJSON(message: BoneRotation): unknown {
+    const obj: any = {};
+    if (message.boneId !== 0) {
+      obj.boneId = Math.round(message.boneId);
+    }
+    if (message.qx !== 0) {
+      obj.qx = message.qx;
+    }
+    if (message.qy !== 0) {
+      obj.qy = message.qy;
+    }
+    if (message.qz !== 0) {
+      obj.qz = message.qz;
+    }
+    if (message.qw !== 0) {
+      obj.qw = message.qw;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BoneRotation>, I>>(base?: I): BoneRotation {
+    return BoneRotation.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BoneRotation>, I>>(object: I): BoneRotation {
+    const message = createBaseBoneRotation();
+    message.boneId = object.boneId ?? 0;
+    message.qx = object.qx ?? 0;
+    message.qy = object.qy ?? 0;
+    message.qz = object.qz ?? 0;
+    message.qw = object.qw ?? 0;
+    return message;
+  },
+};
+
+function createBaseSolverFrame(): SolverFrame {
+  return { rootX: 0, rootY: 0, rootZ: 0, bones: [], timestamp: 0 };
+}
+
+export const SolverFrame: MessageFns<SolverFrame> = {
+  encode(message: SolverFrame, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.rootX !== 0) {
+      writer.uint32(13).float(message.rootX);
+    }
+    if (message.rootY !== 0) {
+      writer.uint32(21).float(message.rootY);
+    }
+    if (message.rootZ !== 0) {
+      writer.uint32(29).float(message.rootZ);
+    }
+    for (const v of message.bones) {
+      BoneRotation.encode(v!, writer.uint32(34).fork()).join();
+    }
+    if (message.timestamp !== 0) {
+      writer.uint32(40).uint64(message.timestamp);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SolverFrame {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseSolverFrame();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 13) {
+              break;
+            }
+
+            message.rootX = reader.float();
+            continue;
+          }
+          case 2: {
+            if (tag !== 21) {
+              break;
+            }
+
+            message.rootY = reader.float();
+            continue;
+          }
+          case 3: {
+            if (tag !== 29) {
+              break;
+            }
+
+            message.rootZ = reader.float();
+            continue;
+          }
+          case 4: {
+            if (tag !== 34) {
+              break;
+            }
+
+            message.bones.push(BoneRotation.decode(reader, reader.uint32()));
+            continue;
+          }
+          case 5: {
+            if (tag !== 40) {
+              break;
+            }
+
+            message.timestamp = longToNumber(reader.uint64());
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): SolverFrame {
+    return {
+      rootX: isSet(object.rootX)
+        ? globalThis.Number(object.rootX)
+        : isSet(object.root_x)
+        ? globalThis.Number(object.root_x)
+        : 0,
+      rootY: isSet(object.rootY)
+        ? globalThis.Number(object.rootY)
+        : isSet(object.root_y)
+        ? globalThis.Number(object.root_y)
+        : 0,
+      rootZ: isSet(object.rootZ)
+        ? globalThis.Number(object.rootZ)
+        : isSet(object.root_z)
+        ? globalThis.Number(object.root_z)
+        : 0,
+      bones: globalThis.Array.isArray(object?.bones) ? object.bones.map((e: any) => BoneRotation.fromJSON(e)) : [],
+      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+    };
+  },
+
+  toJSON(message: SolverFrame): unknown {
+    const obj: any = {};
+    if (message.rootX !== 0) {
+      obj.rootX = message.rootX;
+    }
+    if (message.rootY !== 0) {
+      obj.rootY = message.rootY;
+    }
+    if (message.rootZ !== 0) {
+      obj.rootZ = message.rootZ;
+    }
+    if (message.bones?.length) {
+      obj.bones = message.bones.map((e) => BoneRotation.toJSON(e));
+    }
+    if (message.timestamp !== 0) {
+      obj.timestamp = Math.round(message.timestamp);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SolverFrame>, I>>(base?: I): SolverFrame {
+    return SolverFrame.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SolverFrame>, I>>(object: I): SolverFrame {
+    const message = createBaseSolverFrame();
+    message.rootX = object.rootX ?? 0;
+    message.rootY = object.rootY ?? 0;
+    message.rootZ = object.rootZ ?? 0;
+    message.bones = object.bones?.map((e) => BoneRotation.fromPartial(e)) || [];
+    message.timestamp = object.timestamp ?? 0;
     return message;
   },
 };
