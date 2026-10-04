@@ -10,10 +10,20 @@ message Point3D {
   float visibility = 5;
 }
 
+message Handshake {
+  string skeleton_type = 1;
+}
+
 message MocapFrame {
   uint64 timestamp = 1;
-  string skeleton_type = 2;
-  repeated Point3D landmarks = 3;
+  repeated Point3D landmarks = 2;
+}
+
+message ClientMessage {
+  oneof payload {
+    Handshake handshake  = 1;
+    MocapFrame frame = 2;
+  }
 }
 
 message BoneRotation {

@@ -32,14 +32,17 @@ async fn ws_handler(
 async fn handle_socket(mut socket: WebSocket, tx: SharedState) {
     println!("Клиент подключен по WS (TCP)");
 
+    let mut current_skeleton_type = String::new();
+
     while let Some(Ok(msg)) = socket.next().await {
         match msg {
             Message::Binary(bytes) => match mocap::ClientMessage::decode(bytes) {
                 Ok(client_msg) => match client_msg.payload {
                     Some(Payload::Handshake(handshake)) => {
+                        current_skeleton_type = handshake.skeleton_type;
                         println!(
                             "Получен handshake, тип скелета: {}",
-                            handshake.skeleton_type
+                            current_skeleton_type.skeleton_type
                         );
                     }
                     Some(Payload::Frame(frame)) => {

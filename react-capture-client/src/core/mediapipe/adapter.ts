@@ -1,4 +1,4 @@
-import type { MocapFrame } from "../types/schema";
+import type { MocapFrame } from "../../types/schema";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 export function formatMediaPipeData(
@@ -7,7 +7,6 @@ export function formatMediaPipeData(
 ): MocapFrame {
   return {
     timestamp,
-    skeletonType: "mediapipe_33",
     landmarks: rawLandmarks.map((lm, index) => ({
       id: index,
       x: lm.x,

@@ -1,5 +1,5 @@
 import { useUIStore } from "../../store/uiStore";
-import { MocapFrame } from "../../types/schema";
+import { ClientMessage } from "../../types/schema";
 
 export class SocketEngine {
   private static ws: WebSocket | null = null;
@@ -14,6 +14,15 @@ export class SocketEngine {
     this.ws.onopen = () => {
       console.log("WS: connected");
       useUIStore.getState().setConnected(true);
+
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        const handshakeMsg = ClientMessage.create({
+          handshake: { skeletonType: "mediapipe_33" },
+        });
+        const bytes = ClientMessage.encode(handshakeMsg).finish();
+        this.ws.send(bytes);
+        console.log("WS: Handshake sent");
+      }
     };
 
     this.ws.onclose = () => {
@@ -29,7 +38,10 @@ export class SocketEngine {
 
   static sendFrame(frameData: any) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const bytes = MocapFrame.encode(frameData).finish();
+      const clientMsg = ClientMessage.create({
+        frame: frameData,
+      });
+      const bytes = ClientMessage.encode(clientMsg).finish();
       this.ws.send(bytes);
     }
   }

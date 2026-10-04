@@ -17,10 +17,18 @@ export interface Point3D {
   visibility: number;
 }
 
+export interface Handshake {
+  skeletonType: string;
+}
+
 export interface MocapFrame {
   timestamp: number;
-  skeletonType: string;
   landmarks: Point3D[];
+}
+
+export interface ClientMessage {
+  handshake?: Handshake | undefined;
+  frame?: MocapFrame | undefined;
 }
 
 export interface BoneRotation {
@@ -172,8 +180,81 @@ export const Point3D: MessageFns<Point3D> = {
   },
 };
 
+function createBaseHandshake(): Handshake {
+  return { skeletonType: "" };
+}
+
+export const Handshake: MessageFns<Handshake> = {
+  encode(message: Handshake, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.skeletonType !== "") {
+      writer.uint32(10).string(message.skeletonType);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Handshake {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseHandshake();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 10) {
+              break;
+            }
+
+            message.skeletonType = reader.string();
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): Handshake {
+    return {
+      skeletonType: isSet(object.skeletonType)
+        ? globalThis.String(object.skeletonType)
+        : isSet(object.skeleton_type)
+        ? globalThis.String(object.skeleton_type)
+        : "",
+    };
+  },
+
+  toJSON(message: Handshake): unknown {
+    const obj: any = {};
+    if (message.skeletonType !== "") {
+      obj.skeletonType = message.skeletonType;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Handshake>, I>>(base?: I): Handshake {
+    return Handshake.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Handshake>, I>>(object: I): Handshake {
+    const message = createBaseHandshake();
+    message.skeletonType = object.skeletonType ?? "";
+    return message;
+  },
+};
+
 function createBaseMocapFrame(): MocapFrame {
-  return { timestamp: 0, skeletonType: "", landmarks: [] };
+  return { timestamp: 0, landmarks: [] };
 }
 
 export const MocapFrame: MessageFns<MocapFrame> = {
@@ -181,11 +262,8 @@ export const MocapFrame: MessageFns<MocapFrame> = {
     if (message.timestamp !== 0) {
       writer.uint32(8).uint64(message.timestamp);
     }
-    if (message.skeletonType !== "") {
-      writer.uint32(18).string(message.skeletonType);
-    }
     for (const v of message.landmarks) {
-      Point3D.encode(v!, writer.uint32(26).fork()).join();
+      Point3D.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -216,14 +294,6 @@ export const MocapFrame: MessageFns<MocapFrame> = {
               break;
             }
 
-            message.skeletonType = reader.string();
-            continue;
-          }
-          case 3: {
-            if (tag !== 26) {
-              break;
-            }
-
             message.landmarks.push(Point3D.decode(reader, reader.uint32()));
             continue;
           }
@@ -242,11 +312,6 @@ export const MocapFrame: MessageFns<MocapFrame> = {
   fromJSON(object: any): MocapFrame {
     return {
       timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
-      skeletonType: isSet(object.skeletonType)
-        ? globalThis.String(object.skeletonType)
-        : isSet(object.skeleton_type)
-        ? globalThis.String(object.skeleton_type)
-        : "",
       landmarks: globalThis.Array.isArray(object?.landmarks)
         ? object.landmarks.map((e: any) => Point3D.fromJSON(e))
         : [],
@@ -257,9 +322,6 @@ export const MocapFrame: MessageFns<MocapFrame> = {
     const obj: any = {};
     if (message.timestamp !== 0) {
       obj.timestamp = Math.round(message.timestamp);
-    }
-    if (message.skeletonType !== "") {
-      obj.skeletonType = message.skeletonType;
     }
     if (message.landmarks?.length) {
       obj.landmarks = message.landmarks.map((e) => Point3D.toJSON(e));
@@ -273,8 +335,96 @@ export const MocapFrame: MessageFns<MocapFrame> = {
   fromPartial<I extends Exact<DeepPartial<MocapFrame>, I>>(object: I): MocapFrame {
     const message = createBaseMocapFrame();
     message.timestamp = object.timestamp ?? 0;
-    message.skeletonType = object.skeletonType ?? "";
     message.landmarks = object.landmarks?.map((e) => Point3D.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseClientMessage(): ClientMessage {
+  return { handshake: undefined, frame: undefined };
+}
+
+export const ClientMessage: MessageFns<ClientMessage> = {
+  encode(message: ClientMessage, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.handshake !== undefined) {
+      Handshake.encode(message.handshake, writer.uint32(10).fork()).join();
+    }
+    if (message.frame !== undefined) {
+      MocapFrame.encode(message.frame, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ClientMessage {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseClientMessage();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 10) {
+              break;
+            }
+
+            message.handshake = Handshake.decode(reader, reader.uint32());
+            continue;
+          }
+          case 2: {
+            if (tag !== 18) {
+              break;
+            }
+
+            message.frame = MocapFrame.decode(reader, reader.uint32());
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): ClientMessage {
+    return {
+      handshake: isSet(object.handshake) ? Handshake.fromJSON(object.handshake) : undefined,
+      frame: isSet(object.frame) ? MocapFrame.fromJSON(object.frame) : undefined,
+    };
+  },
+
+  toJSON(message: ClientMessage): unknown {
+    const obj: any = {};
+    if (message.handshake !== undefined) {
+      obj.handshake = Handshake.toJSON(message.handshake);
+    }
+    if (message.frame !== undefined) {
+      obj.frame = MocapFrame.toJSON(message.frame);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ClientMessage>, I>>(base?: I): ClientMessage {
+    return ClientMessage.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ClientMessage>, I>>(object: I): ClientMessage {
+    const message = createBaseClientMessage();
+    message.handshake = (object.handshake !== undefined && object.handshake !== null)
+      ? Handshake.fromPartial(object.handshake)
+      : undefined;
+    message.frame = (object.frame !== undefined && object.frame !== null)
+      ? MocapFrame.fromPartial(object.frame)
+      : undefined;
     return message;
   },
 };
