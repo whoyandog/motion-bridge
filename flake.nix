@@ -24,6 +24,7 @@
             caddy
             mprocs
             protobuf
+            godot_4
           ];
 
           PROTOC = "${pkgs.protobuf}/bin/protoc";

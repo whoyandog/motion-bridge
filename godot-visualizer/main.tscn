@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://dpyfr6dr1ecsu"]
+
+[ext_resource type="Script" uid="uid://bovlb6d322ygg" path="res://main.gd" id="1_ig7tw"]
+
+[node name="VisualizerRoot" type="Node3D" unique_id=2097324588]
+script = ExtResource("1_ig7tw")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1870822407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1193619465]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 0, 0)
+shadow_enabled = true
