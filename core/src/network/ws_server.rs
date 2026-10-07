@@ -1,5 +1,5 @@
-use crate::mocap;
-use crate::mocap::client_message::Payload;
+use crate::motion_bridge_schema;
+use crate::motion_bridge_schema::capture_event_packet::Payload;
 use axum::{
     Router,
     extract::{
@@ -13,9 +13,11 @@ use prost::Message as ProstMessage;
 use std::sync::Arc;
 use tokio::sync::watch;
 
-type SharedState = Arc<watch::Sender<Option<mocap::MocapFrame>>>;
+type SharedState = Arc<watch::Sender<Option<motion_bridge_schema::CaptureEventPacket>>>;
 
-pub fn create_router(tx: watch::Sender<Option<mocap::MocapFrame>>) -> Router {
+pub fn create_router(
+    tx: watch::Sender<Option<motion_bridge_schema::CaptureEventPacket>>,
+) -> Router {
     let state = Arc::new(tx);
     Router::new()
         .route("/ws", get(ws_handler))
@@ -34,16 +36,14 @@ async fn handle_socket(mut socket: WebSocket, tx: SharedState) {
 
     while let Some(Ok(msg)) = socket.next().await {
         match msg {
-            Message::Binary(bytes) => match mocap::ClientMessage::decode(bytes) {
-                Ok(client_msg) => match client_msg.payload {
+            Message::Binary(bytes) => match motion_bridge_schema::CaptureEventPacket::decode(bytes)
+            {
+                Ok(event) => match event.payload {
                     Some(Payload::Handshake(handshake)) => {
-                        println!(
-                            "Получен handshake, тип скелета: {}",
-                            handshake.skeleton_type
-                        );
+                        println!("Получен handshake, тип скелета: {}", handshake.model_name);
                     }
-                    Some(Payload::Frame(frame)) => {
-                        let _ = tx.send(Some(frame));
+                    Some(Payload::Body(ref _body)) => {
+                        let _ = tx.send(Some(event));
                     }
                     None => {
                         eprintln!("Получено пустое сообщение (payload отсутствует)");

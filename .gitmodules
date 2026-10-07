@@ -1,3 +1,3 @@
-[submodule "godot-visualizer/addons/godobuf"]
-	path = godot-visualizer/addons/godobuf
+[submodule "godot-visualizer/vendor/godobuf"]
+	path = godot-visualizer/vendor/godobuf
 	url = https://github.com/oniksan/godobuf.git

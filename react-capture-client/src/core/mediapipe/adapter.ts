@@ -1,18 +1,20 @@
-import type { MocapFrame } from "../../types/schema";
+import type { BridgeCaptureEvent } from "../../types/schema";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 export function formatMediaPipeData(
   rawLandmarks: NormalizedLandmark[],
   timestamp: number,
-): MocapFrame {
+): CaptureEventPacket {
+  const flatArray: number[] = [];
+  for (const lm of rawLandmarks) {
+    flatArray.push(lm.x, lm.y, lm.z, lm.visibility ?? 1.0);
+  }
+
   return {
     timestamp,
-    landmarks: rawLandmarks.map((lm, index) => ({
-      id: index,
-      x: lm.x,
-      y: lm.y,
-      z: lm.z,
-      visibility: lm.visibility ?? 1.0,
-    })),
+    actorId: 1,
+    body: {
+      landmarksData: flatArray,
+    },
   };
 }

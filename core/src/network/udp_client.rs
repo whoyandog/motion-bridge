@@ -1,9 +1,9 @@
-use crate::mocap::SolverFrame;
+use crate::motion_bridge_schema::RigUpdatePacket;
 use prost::Message;
 use tokio::net::UdpSocket;
 use tokio::sync::watch;
 
-pub async fn start(mut rx_solved: watch::Receiver<Option<SolverFrame>>) {
+pub async fn start(mut rx_solved: watch::Receiver<Option<RigUpdatePacket>>) {
     let socket = UdpSocket::bind("127.0.0.1:0")
         .await
         .expect("Не удалось создать UDP сокет");

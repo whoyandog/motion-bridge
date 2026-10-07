@@ -21,11 +21,12 @@ func _process(_delta: float) -> void:
 		_decode_packet(packet)
 
 func _decode_packet(packet: PackedByteArray) -> void:
-	var frame = Schema.SolverFrame.new()
+	var update_packet = Schema.RigUpdatePacket.new()
 	
-	var result = frame.from_bytes(packet)
+	var result = update_packet.from_bytes(packet)
 	
 	if result == 0:
-		emit_signal("frame_received", frame)
+		if update_packet.has_body():
+			emit_signal("frame_received", update_packet.get_body())
 	else:
 		push_warning("Ошибка парсинга пакета, код ошибки: ", result)

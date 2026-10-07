@@ -1,5 +1,5 @@
-pub mod mocap {
-    include!(concat!(env!("OUT_DIR"), "/mocap.rs"));
+pub mod motion_bridge_schema {
+    include!(concat!(env!("OUT_DIR"), "/motion_bridge.rs"));
 }
 
 mod network;

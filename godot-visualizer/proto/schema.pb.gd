@@ -683,102 +683,30 @@ class PBPacker:
 ############### USER DATA BEGIN ################
 
 
-class Point3D:
+class ClientHandshake:
 	extends RefCounted
 	func _init():
 		var service
 		
-		__id = PBField.new("id", PB_DATA_TYPE.UINT32, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32])
+		__model_name = PBField.new("model_name", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
 		service = PBServiceField.new()
-		service.field = __id
-		data[__id.tag] = service
-		
-		__x = PBField.new("x", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __x
-		data[__x.tag] = service
-		
-		__y = PBField.new("y", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __y
-		data[__y.tag] = service
-		
-		__z = PBField.new("z", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __z
-		data[__z.tag] = service
-		
-		__visibility = PBField.new("visibility", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __visibility
-		data[__visibility.tag] = service
+		service.field = __model_name
+		data[__model_name.tag] = service
 		
 	var data = {}
 	
-	var __id: PBField
-	func has_id() -> bool:
-		if __id.value != null:
+	var __model_name: PBField
+	func has_model_name() -> bool:
+		if __model_name.value != null:
 			return true
 		return false
-	func get_id() -> int:
-		return __id.value
-	func clear_id() -> void:
+	func get_model_name() -> String:
+		return __model_name.value
+	func clear_model_name() -> void:
 		data[1].state = PB_SERVICE_STATE.UNFILLED
-		__id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32]
-	func set_id(value : int) -> void:
-		__id.value = value
-	
-	var __x: PBField
-	func has_x() -> bool:
-		if __x.value != null:
-			return true
-		return false
-	func get_x() -> float:
-		return __x.value
-	func clear_x() -> void:
-		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__x.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_x(value : float) -> void:
-		__x.value = value
-	
-	var __y: PBField
-	func has_y() -> bool:
-		if __y.value != null:
-			return true
-		return false
-	func get_y() -> float:
-		return __y.value
-	func clear_y() -> void:
-		data[3].state = PB_SERVICE_STATE.UNFILLED
-		__y.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_y(value : float) -> void:
-		__y.value = value
-	
-	var __z: PBField
-	func has_z() -> bool:
-		if __z.value != null:
-			return true
-		return false
-	func get_z() -> float:
-		return __z.value
-	func clear_z() -> void:
-		data[4].state = PB_SERVICE_STATE.UNFILLED
-		__z.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_z(value : float) -> void:
-		__z.value = value
-	
-	var __visibility: PBField
-	func has_visibility() -> bool:
-		if __visibility.value != null:
-			return true
-		return false
-	func get_visibility() -> float:
-		return __visibility.value
-	func clear_visibility() -> void:
-		data[5].state = PB_SERVICE_STATE.UNFILLED
-		__visibility.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_visibility(value : float) -> void:
-		__visibility.value = value
+		__model_name.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_model_name(value : String) -> void:
+		__model_name.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -801,30 +729,27 @@ class Point3D:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
-class Handshake:
+class BodyLandmarks:
 	extends RefCounted
 	func _init():
 		var service
 		
-		__skeleton_type = PBField.new("skeleton_type", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		var __landmarks_data_default: Array[float] = []
+		__landmarks_data = PBField.new("landmarks_data", PB_DATA_TYPE.FLOAT, PB_RULE.REPEATED, 1, true, __landmarks_data_default)
 		service = PBServiceField.new()
-		service.field = __skeleton_type
-		data[__skeleton_type.tag] = service
+		service.field = __landmarks_data
+		data[__landmarks_data.tag] = service
 		
 	var data = {}
 	
-	var __skeleton_type: PBField
-	func has_skeleton_type() -> bool:
-		if __skeleton_type.value != null:
-			return true
-		return false
-	func get_skeleton_type() -> String:
-		return __skeleton_type.value
-	func clear_skeleton_type() -> void:
+	var __landmarks_data: PBField
+	func get_landmarks_data() -> Array[float]:
+		return __landmarks_data.value
+	func clear_landmarks_data() -> void:
 		data[1].state = PB_SERVICE_STATE.UNFILLED
-		__skeleton_type.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
-	func set_skeleton_type(value : String) -> void:
-		__skeleton_type.value = value
+		__landmarks_data.value.clear()
+	func add_landmarks_data(value : float) -> void:
+		__landmarks_data.value.append(value)
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -847,7 +772,7 @@ class Handshake:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
-class MocapFrame:
+class CaptureEventPacket:
 	extends RefCounted
 	func _init():
 		var service
@@ -857,15 +782,32 @@ class MocapFrame:
 		service.field = __timestamp
 		data[__timestamp.tag] = service
 		
-		var __landmarks_default: Array[Point3D] = []
-		__landmarks = PBField.new("landmarks", PB_DATA_TYPE.MESSAGE, PB_RULE.REPEATED, 2, true, __landmarks_default)
+		__actor_id = PBField.new("actor_id", PB_DATA_TYPE.UINT32, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32])
 		service = PBServiceField.new()
-		service.field = __landmarks
-		service.func_ref = Callable(self, "add_landmarks")
-		data[__landmarks.tag] = service
+		service.field = __actor_id
+		data[__actor_id.tag] = service
+		
+		__handshake = PBField.new("handshake", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
+		service = PBServiceField.new()
+		service.field = __handshake
+		service.func_ref = Callable(self, "new_handshake")
+		data[__handshake.tag] = service
+		
+		__body = PBField.new("body", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 6, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
+		service = PBServiceField.new()
+		service.field = __body
+		service.func_ref = Callable(self, "new_body")
+		data[__body.tag] = service
 		
 	var data = {}
 	
+	enum PayloadCase {
+		PAYLOAD_NOT_SET = 0,
+		HANDSHAKE = 3,
+		BODY = 6,
+	}
+	var _payload_case: int = 0
+
 	var __timestamp: PBField
 	func has_timestamp() -> bool:
 		if __timestamp.value != null:
@@ -879,95 +821,50 @@ class MocapFrame:
 	func set_timestamp(value : int) -> void:
 		__timestamp.value = value
 	
-	var __landmarks: PBField
-	func get_landmarks() -> Array[Point3D]:
-		return __landmarks.value
-	func clear_landmarks() -> void:
+	var __actor_id: PBField
+	func has_actor_id() -> bool:
+		if __actor_id.value != null:
+			return true
+		return false
+	func get_actor_id() -> int:
+		return __actor_id.value
+	func clear_actor_id() -> void:
 		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__landmarks.value.clear()
-	func add_landmarks() -> Point3D:
-		var element = Point3D.new()
-		__landmarks.value.append(element)
-		return element
+		__actor_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32]
+	func set_actor_id(value : int) -> void:
+		__actor_id.value = value
 	
-	func _to_string() -> String:
-		return PBPacker.message_to_string(data)
-		
-	func to_bytes() -> PackedByteArray:
-		return PBPacker.pack_message(data)
-		
-	func from_bytes(bytes : PackedByteArray, offset : int = 0, limit : int = -1) -> int:
-		var cur_limit = bytes.size()
-		if limit != -1:
-			cur_limit = limit
-		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
-		if result == cur_limit:
-			if PBPacker.check_required(data):
-				if limit == -1:
-					return PB_ERR.NO_ERRORS
-			else:
-				return PB_ERR.REQUIRED_FIELDS
-		elif limit == -1 && result > 0:
-			return PB_ERR.PARSE_INCOMPLETE
-		return result
-	
-class ClientMessage:
-	extends RefCounted
-	func _init():
-		var service
-		
-		__handshake = PBField.new("handshake", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
-		service = PBServiceField.new()
-		service.field = __handshake
-		service.func_ref = Callable(self, "new_handshake")
-		data[__handshake.tag] = service
-		
-		__frame = PBField.new("frame", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
-		service = PBServiceField.new()
-		service.field = __frame
-		service.func_ref = Callable(self, "new_frame")
-		data[__frame.tag] = service
-		
-	var data = {}
-	
-	enum PayloadCase {
-		PAYLOAD_NOT_SET = 0,
-		HANDSHAKE = 1,
-		FRAME = 2,
-	}
-	var _payload_case: int = 0
-
 	var __handshake: PBField
 	func has_handshake() -> bool:
-		return data[1].state == PB_SERVICE_STATE.FILLED
-	func get_handshake() -> Handshake:
+		return data[3].state == PB_SERVICE_STATE.FILLED
+	func get_handshake() -> ClientHandshake:
 		return __handshake.value
 	func clear_handshake() -> void:
-		data[1].state = PB_SERVICE_STATE.UNFILLED
+		data[3].state = PB_SERVICE_STATE.UNFILLED
 		__handshake.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
-	func new_handshake() -> Handshake:
-		data[1].state = PB_SERVICE_STATE.FILLED
-		_payload_case = 1
-		__frame.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
-		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__handshake.value = Handshake.new()
+	func new_handshake() -> ClientHandshake:
+		data[3].state = PB_SERVICE_STATE.FILLED
+		_payload_case = 3
+		__body.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
+		data[6].state = PB_SERVICE_STATE.UNFILLED
+		__handshake.value = ClientHandshake.new()
 		return __handshake.value
 	
-	var __frame: PBField
-	func has_frame() -> bool:
-		return data[2].state == PB_SERVICE_STATE.FILLED
-	func get_frame() -> MocapFrame:
-		return __frame.value
-	func clear_frame() -> void:
-		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__frame.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
-	func new_frame() -> MocapFrame:
+	var __body: PBField
+	func has_body() -> bool:
+		return data[6].state == PB_SERVICE_STATE.FILLED
+	func get_body() -> BodyLandmarks:
+		return __body.value
+	func clear_body() -> void:
+		data[6].state = PB_SERVICE_STATE.UNFILLED
+		__body.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
+	func new_body() -> BodyLandmarks:
 		__handshake.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
-		data[1].state = PB_SERVICE_STATE.UNFILLED
-		data[2].state = PB_SERVICE_STATE.FILLED
-		_payload_case = 2
-		__frame.value = MocapFrame.new()
-		return __frame.value
+		data[3].state = PB_SERVICE_STATE.UNFILLED
+		data[6].state = PB_SERVICE_STATE.FILLED
+		_payload_case = 6
+		__body.value = BodyLandmarks.new()
+		return __body.value
 	
 	func get_payload_case() -> int:
 		return _payload_case
@@ -992,102 +889,66 @@ class ClientMessage:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
-class BoneRotation:
+class ProtoVector3:
 	extends RefCounted
 	func _init():
 		var service
 		
-		__bone_id = PBField.new("bone_id", PB_DATA_TYPE.UINT32, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32])
+		__x = PBField.new("x", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __bone_id
-		data[__bone_id.tag] = service
+		service.field = __x
+		data[__x.tag] = service
 		
-		__qx = PBField.new("qx", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		__y = PBField.new("y", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __qx
-		data[__qx.tag] = service
+		service.field = __y
+		data[__y.tag] = service
 		
-		__qy = PBField.new("qy", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		__z = PBField.new("z", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __qy
-		data[__qy.tag] = service
-		
-		__qz = PBField.new("qz", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __qz
-		data[__qz.tag] = service
-		
-		__qw = PBField.new("qw", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
-		service = PBServiceField.new()
-		service.field = __qw
-		data[__qw.tag] = service
+		service.field = __z
+		data[__z.tag] = service
 		
 	var data = {}
 	
-	var __bone_id: PBField
-	func has_bone_id() -> bool:
-		if __bone_id.value != null:
+	var __x: PBField
+	func has_x() -> bool:
+		if __x.value != null:
 			return true
 		return false
-	func get_bone_id() -> int:
-		return __bone_id.value
-	func clear_bone_id() -> void:
+	func get_x() -> float:
+		return __x.value
+	func clear_x() -> void:
 		data[1].state = PB_SERVICE_STATE.UNFILLED
-		__bone_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32]
-	func set_bone_id(value : int) -> void:
-		__bone_id.value = value
+		__x.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_x(value : float) -> void:
+		__x.value = value
 	
-	var __qx: PBField
-	func has_qx() -> bool:
-		if __qx.value != null:
+	var __y: PBField
+	func has_y() -> bool:
+		if __y.value != null:
 			return true
 		return false
-	func get_qx() -> float:
-		return __qx.value
-	func clear_qx() -> void:
+	func get_y() -> float:
+		return __y.value
+	func clear_y() -> void:
 		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__qx.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_qx(value : float) -> void:
-		__qx.value = value
+		__y.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_y(value : float) -> void:
+		__y.value = value
 	
-	var __qy: PBField
-	func has_qy() -> bool:
-		if __qy.value != null:
+	var __z: PBField
+	func has_z() -> bool:
+		if __z.value != null:
 			return true
 		return false
-	func get_qy() -> float:
-		return __qy.value
-	func clear_qy() -> void:
+	func get_z() -> float:
+		return __z.value
+	func clear_z() -> void:
 		data[3].state = PB_SERVICE_STATE.UNFILLED
-		__qy.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_qy(value : float) -> void:
-		__qy.value = value
-	
-	var __qz: PBField
-	func has_qz() -> bool:
-		if __qz.value != null:
-			return true
-		return false
-	func get_qz() -> float:
-		return __qz.value
-	func clear_qz() -> void:
-		data[4].state = PB_SERVICE_STATE.UNFILLED
-		__qz.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_qz(value : float) -> void:
-		__qz.value = value
-	
-	var __qw: PBField
-	func has_qw() -> bool:
-		if __qw.value != null:
-			return true
-		return false
-	func get_qw() -> float:
-		return __qw.value
-	func clear_qw() -> void:
-		data[5].state = PB_SERVICE_STATE.UNFILLED
-		__qw.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_qw(value : float) -> void:
-		__qw.value = value
+		__z.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_z(value : float) -> void:
+		__z.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -1110,90 +971,201 @@ class BoneRotation:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
-class SolverFrame:
+class ProtoQuaternion:
 	extends RefCounted
 	func _init():
 		var service
 		
-		__root_x = PBField.new("root_x", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		__x = PBField.new("x", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __root_x
-		data[__root_x.tag] = service
+		service.field = __x
+		data[__x.tag] = service
 		
-		__root_y = PBField.new("root_y", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		__y = PBField.new("y", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __root_y
-		data[__root_y.tag] = service
+		service.field = __y
+		data[__y.tag] = service
 		
-		__root_z = PBField.new("root_z", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		__z = PBField.new("z", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __root_z
-		data[__root_z.tag] = service
+		service.field = __z
+		data[__z.tag] = service
 		
-		var __bones_default: Array[BoneRotation] = []
-		__bones = PBField.new("bones", PB_DATA_TYPE.MESSAGE, PB_RULE.REPEATED, 4, true, __bones_default)
+		__w = PBField.new("w", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
 		service = PBServiceField.new()
-		service.field = __bones
-		service.func_ref = Callable(self, "add_bones")
-		data[__bones.tag] = service
+		service.field = __w
+		data[__w.tag] = service
 		
-		__timestamp = PBField.new("timestamp", PB_DATA_TYPE.UINT64, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT64])
+	var data = {}
+	
+	var __x: PBField
+	func has_x() -> bool:
+		if __x.value != null:
+			return true
+		return false
+	func get_x() -> float:
+		return __x.value
+	func clear_x() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		__x.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_x(value : float) -> void:
+		__x.value = value
+	
+	var __y: PBField
+	func has_y() -> bool:
+		if __y.value != null:
+			return true
+		return false
+	func get_y() -> float:
+		return __y.value
+	func clear_y() -> void:
+		data[2].state = PB_SERVICE_STATE.UNFILLED
+		__y.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_y(value : float) -> void:
+		__y.value = value
+	
+	var __z: PBField
+	func has_z() -> bool:
+		if __z.value != null:
+			return true
+		return false
+	func get_z() -> float:
+		return __z.value
+	func clear_z() -> void:
+		data[3].state = PB_SERVICE_STATE.UNFILLED
+		__z.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_z(value : float) -> void:
+		__z.value = value
+	
+	var __w: PBField
+	func has_w() -> bool:
+		if __w.value != null:
+			return true
+		return false
+	func get_w() -> float:
+		return __w.value
+	func clear_w() -> void:
+		data[4].state = PB_SERVICE_STATE.UNFILLED
+		__w.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_w(value : float) -> void:
+		__w.value = value
+	
+	func _to_string() -> String:
+		return PBPacker.message_to_string(data)
+		
+	func to_bytes() -> PackedByteArray:
+		return PBPacker.pack_message(data)
+		
+	func from_bytes(bytes : PackedByteArray, offset : int = 0, limit : int = -1) -> int:
+		var cur_limit = bytes.size()
+		if limit != -1:
+			cur_limit = limit
+		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
+		if result == cur_limit:
+			if PBPacker.check_required(data):
+				if limit == -1:
+					return PB_ERR.NO_ERRORS
+			else:
+				return PB_ERR.REQUIRED_FIELDS
+		elif limit == -1 && result > 0:
+			return PB_ERR.PARSE_INCOMPLETE
+		return result
+	
+class BodyFrame:
+	extends RefCounted
+	func _init():
+		var service
+		
+		__root_position = PBField.new("root_position", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
+		service = PBServiceField.new()
+		service.field = __root_position
+		service.func_ref = Callable(self, "new_root_position")
+		data[__root_position.tag] = service
+		
+		var __bone_rotations_default: Array[ProtoQuaternion] = []
+		__bone_rotations = PBField.new("bone_rotations", PB_DATA_TYPE.MESSAGE, PB_RULE.REPEATED, 6, true, __bone_rotations_default)
+		service = PBServiceField.new()
+		service.field = __bone_rotations
+		service.func_ref = Callable(self, "add_bone_rotations")
+		data[__bone_rotations.tag] = service
+		
+	var data = {}
+	
+	var __root_position: PBField
+	func has_root_position() -> bool:
+		if __root_position.value != null:
+			return true
+		return false
+	func get_root_position() -> ProtoVector3:
+		return __root_position.value
+	func clear_root_position() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		__root_position.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
+	func new_root_position() -> ProtoVector3:
+		__root_position.value = ProtoVector3.new()
+		return __root_position.value
+	
+	var __bone_rotations: PBField
+	func get_bone_rotations() -> Array[ProtoQuaternion]:
+		return __bone_rotations.value
+	func clear_bone_rotations() -> void:
+		data[6].state = PB_SERVICE_STATE.UNFILLED
+		__bone_rotations.value.clear()
+	func add_bone_rotations() -> ProtoQuaternion:
+		var element = ProtoQuaternion.new()
+		__bone_rotations.value.append(element)
+		return element
+	
+	func _to_string() -> String:
+		return PBPacker.message_to_string(data)
+		
+	func to_bytes() -> PackedByteArray:
+		return PBPacker.pack_message(data)
+		
+	func from_bytes(bytes : PackedByteArray, offset : int = 0, limit : int = -1) -> int:
+		var cur_limit = bytes.size()
+		if limit != -1:
+			cur_limit = limit
+		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
+		if result == cur_limit:
+			if PBPacker.check_required(data):
+				if limit == -1:
+					return PB_ERR.NO_ERRORS
+			else:
+				return PB_ERR.REQUIRED_FIELDS
+		elif limit == -1 && result > 0:
+			return PB_ERR.PARSE_INCOMPLETE
+		return result
+	
+class RigUpdatePacket:
+	extends RefCounted
+	func _init():
+		var service
+		
+		__timestamp = PBField.new("timestamp", PB_DATA_TYPE.UINT64, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT64])
 		service = PBServiceField.new()
 		service.field = __timestamp
 		data[__timestamp.tag] = service
 		
+		__actor_id = PBField.new("actor_id", PB_DATA_TYPE.UINT32, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32])
+		service = PBServiceField.new()
+		service.field = __actor_id
+		data[__actor_id.tag] = service
+		
+		__body = PBField.new("body", PB_DATA_TYPE.MESSAGE, PB_RULE.OPTIONAL, 6, true, DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE])
+		service = PBServiceField.new()
+		service.field = __body
+		service.func_ref = Callable(self, "new_body")
+		data[__body.tag] = service
+		
 	var data = {}
 	
-	var __root_x: PBField
-	func has_root_x() -> bool:
-		if __root_x.value != null:
-			return true
-		return false
-	func get_root_x() -> float:
-		return __root_x.value
-	func clear_root_x() -> void:
-		data[1].state = PB_SERVICE_STATE.UNFILLED
-		__root_x.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_root_x(value : float) -> void:
-		__root_x.value = value
-	
-	var __root_y: PBField
-	func has_root_y() -> bool:
-		if __root_y.value != null:
-			return true
-		return false
-	func get_root_y() -> float:
-		return __root_y.value
-	func clear_root_y() -> void:
-		data[2].state = PB_SERVICE_STATE.UNFILLED
-		__root_y.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_root_y(value : float) -> void:
-		__root_y.value = value
-	
-	var __root_z: PBField
-	func has_root_z() -> bool:
-		if __root_z.value != null:
-			return true
-		return false
-	func get_root_z() -> float:
-		return __root_z.value
-	func clear_root_z() -> void:
-		data[3].state = PB_SERVICE_STATE.UNFILLED
-		__root_z.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
-	func set_root_z(value : float) -> void:
-		__root_z.value = value
-	
-	var __bones: PBField
-	func get_bones() -> Array[BoneRotation]:
-		return __bones.value
-	func clear_bones() -> void:
-		data[4].state = PB_SERVICE_STATE.UNFILLED
-		__bones.value.clear()
-	func add_bones() -> BoneRotation:
-		var element = BoneRotation.new()
-		__bones.value.append(element)
-		return element
-	
+	enum PayloadCase {
+		PAYLOAD_NOT_SET = 0,
+		BODY = 6,
+	}
+	var _payload_case: int = 0
+
 	var __timestamp: PBField
 	func has_timestamp() -> bool:
 		if __timestamp.value != null:
@@ -1202,11 +1174,40 @@ class SolverFrame:
 	func get_timestamp() -> int:
 		return __timestamp.value
 	func clear_timestamp() -> void:
-		data[5].state = PB_SERVICE_STATE.UNFILLED
+		data[1].state = PB_SERVICE_STATE.UNFILLED
 		__timestamp.value = DEFAULT_VALUES_3[PB_DATA_TYPE.UINT64]
 	func set_timestamp(value : int) -> void:
 		__timestamp.value = value
 	
+	var __actor_id: PBField
+	func has_actor_id() -> bool:
+		if __actor_id.value != null:
+			return true
+		return false
+	func get_actor_id() -> int:
+		return __actor_id.value
+	func clear_actor_id() -> void:
+		data[2].state = PB_SERVICE_STATE.UNFILLED
+		__actor_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.UINT32]
+	func set_actor_id(value : int) -> void:
+		__actor_id.value = value
+	
+	var __body: PBField
+	func has_body() -> bool:
+		return data[6].state == PB_SERVICE_STATE.FILLED
+	func get_body() -> BodyFrame:
+		return __body.value
+	func clear_body() -> void:
+		data[6].state = PB_SERVICE_STATE.UNFILLED
+		__body.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
+	func new_body() -> BodyFrame:
+		data[6].state = PB_SERVICE_STATE.FILLED
+		_payload_case = 6
+		__body.value = BodyFrame.new()
+		return __body.value
+	
+	func get_payload_case() -> int:
+		return _payload_case
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
 		

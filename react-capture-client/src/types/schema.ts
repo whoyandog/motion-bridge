@@ -7,71 +7,60 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 
-export const protobufPackage = "mocap";
+export const protobufPackage = "motion_bridge";
 
-export interface Point3D {
-  id: number;
+export interface ClientHandshake {
+  modelName: string;
+}
+
+export interface BodyLandmarks {
+  landmarksData: number[];
+}
+
+export interface CaptureEventPacket {
+  timestamp: number;
+  actorId: number;
+  handshake?: ClientHandshake | undefined;
+  body?: BodyLandmarks | undefined;
+}
+
+export interface ProtoVector3 {
   x: number;
   y: number;
   z: number;
-  visibility: number;
 }
 
-export interface Handshake {
-  skeletonType: string;
+export interface ProtoQuaternion {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
 }
 
-export interface MocapFrame {
+export interface BodyFrame {
+  rootPosition: ProtoVector3 | undefined;
+  boneRotations: ProtoQuaternion[];
+}
+
+export interface RigUpdatePacket {
   timestamp: number;
-  landmarks: Point3D[];
+  actorId: number;
+  body?: BodyFrame | undefined;
 }
 
-export interface ClientMessage {
-  handshake?: Handshake | undefined;
-  frame?: MocapFrame | undefined;
+function createBaseClientHandshake(): ClientHandshake {
+  return { modelName: "" };
 }
 
-export interface BoneRotation {
-  boneId: number;
-  qx: number;
-  qy: number;
-  qz: number;
-  qw: number;
-}
-
-export interface SolverFrame {
-  rootX: number;
-  rootY: number;
-  rootZ: number;
-  bones: BoneRotation[];
-  timestamp: number;
-}
-
-function createBasePoint3D(): Point3D {
-  return { id: 0, x: 0, y: 0, z: 0, visibility: 0 };
-}
-
-export const Point3D: MessageFns<Point3D> = {
-  encode(message: Point3D, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== 0) {
-      writer.uint32(8).uint32(message.id);
-    }
-    if (message.x !== 0) {
-      writer.uint32(21).float(message.x);
-    }
-    if (message.y !== 0) {
-      writer.uint32(29).float(message.y);
-    }
-    if (message.z !== 0) {
-      writer.uint32(37).float(message.z);
-    }
-    if (message.visibility !== 0) {
-      writer.uint32(45).float(message.visibility);
+export const ClientHandshake: MessageFns<ClientHandshake> = {
+  encode(message: ClientHandshake, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.modelName !== "") {
+      writer.uint32(10).string(message.modelName);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Point3D {
+  decode(input: BinaryReader | Uint8Array, length?: number): ClientHandshake {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
     if (previousRecursionDepth >= 100) {
@@ -80,48 +69,16 @@ export const Point3D: MessageFns<Point3D> = {
     (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
     try {
       const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBasePoint3D();
+      const message = createBaseClientHandshake();
       while (reader.pos < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1: {
-            if (tag !== 8) {
+            if (tag !== 10) {
               break;
             }
 
-            message.id = reader.uint32();
-            continue;
-          }
-          case 2: {
-            if (tag !== 21) {
-              break;
-            }
-
-            message.x = reader.float();
-            continue;
-          }
-          case 3: {
-            if (tag !== 29) {
-              break;
-            }
-
-            message.y = reader.float();
-            continue;
-          }
-          case 4: {
-            if (tag !== 37) {
-              break;
-            }
-
-            message.z = reader.float();
-            continue;
-          }
-          case 5: {
-            if (tag !== 45) {
-              break;
-            }
-
-            message.visibility = reader.float();
+            message.modelName = reader.string();
             continue;
           }
         }
@@ -136,21 +93,321 @@ export const Point3D: MessageFns<Point3D> = {
     }
   },
 
-  fromJSON(object: any): Point3D {
+  fromJSON(object: any): ClientHandshake {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
-      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
-      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
-      visibility: isSet(object.visibility) ? globalThis.Number(object.visibility) : 0,
+      modelName: isSet(object.modelName)
+        ? globalThis.String(object.modelName)
+        : isSet(object.model_name)
+        ? globalThis.String(object.model_name)
+        : "",
     };
   },
 
-  toJSON(message: Point3D): unknown {
+  toJSON(message: ClientHandshake): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
-      obj.id = Math.round(message.id);
+    if (message.modelName !== "") {
+      obj.modelName = message.modelName;
     }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ClientHandshake>, I>>(base?: I): ClientHandshake {
+    return ClientHandshake.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ClientHandshake>, I>>(object: I): ClientHandshake {
+    const message = createBaseClientHandshake();
+    message.modelName = object.modelName ?? "";
+    return message;
+  },
+};
+
+function createBaseBodyLandmarks(): BodyLandmarks {
+  return { landmarksData: [] };
+}
+
+export const BodyLandmarks: MessageFns<BodyLandmarks> = {
+  encode(message: BodyLandmarks, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    writer.uint32(10).fork();
+    for (const v of message.landmarksData) {
+      writer.float(v);
+    }
+    writer.join();
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BodyLandmarks {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseBodyLandmarks();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag === 13) {
+              message.landmarksData.push(reader.float());
+
+              continue;
+            }
+
+            if (tag === 10) {
+              const end2 = reader.uint32() + reader.pos;
+              while (reader.pos < end2) {
+                message.landmarksData.push(reader.float());
+              }
+
+              continue;
+            }
+
+            break;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): BodyLandmarks {
+    return {
+      landmarksData: globalThis.Array.isArray(object?.landmarksData)
+        ? object.landmarksData.map((e: any) => globalThis.Number(e))
+        : globalThis.Array.isArray(object?.landmarks_data)
+        ? object.landmarks_data.map((e: any) => globalThis.Number(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BodyLandmarks): unknown {
+    const obj: any = {};
+    if (message.landmarksData?.length) {
+      obj.landmarksData = message.landmarksData;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BodyLandmarks>, I>>(base?: I): BodyLandmarks {
+    return BodyLandmarks.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BodyLandmarks>, I>>(object: I): BodyLandmarks {
+    const message = createBaseBodyLandmarks();
+    message.landmarksData = object.landmarksData?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseCaptureEventPacket(): CaptureEventPacket {
+  return { timestamp: 0, actorId: 0, handshake: undefined, body: undefined };
+}
+
+export const CaptureEventPacket: MessageFns<CaptureEventPacket> = {
+  encode(message: CaptureEventPacket, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.timestamp !== 0) {
+      writer.uint32(8).uint64(message.timestamp);
+    }
+    if (message.actorId !== 0) {
+      writer.uint32(16).uint32(message.actorId);
+    }
+    if (message.handshake !== undefined) {
+      ClientHandshake.encode(message.handshake, writer.uint32(26).fork()).join();
+    }
+    if (message.body !== undefined) {
+      BodyLandmarks.encode(message.body, writer.uint32(50).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CaptureEventPacket {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseCaptureEventPacket();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 8) {
+              break;
+            }
+
+            message.timestamp = longToNumber(reader.uint64());
+            continue;
+          }
+          case 2: {
+            if (tag !== 16) {
+              break;
+            }
+
+            message.actorId = reader.uint32();
+            continue;
+          }
+          case 3: {
+            if (tag !== 26) {
+              break;
+            }
+
+            message.handshake = ClientHandshake.decode(reader, reader.uint32());
+            continue;
+          }
+          case 6: {
+            if (tag !== 50) {
+              break;
+            }
+
+            message.body = BodyLandmarks.decode(reader, reader.uint32());
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): CaptureEventPacket {
+    return {
+      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+      actorId: isSet(object.actorId)
+        ? globalThis.Number(object.actorId)
+        : isSet(object.actor_id)
+        ? globalThis.Number(object.actor_id)
+        : 0,
+      handshake: isSet(object.handshake) ? ClientHandshake.fromJSON(object.handshake) : undefined,
+      body: isSet(object.body) ? BodyLandmarks.fromJSON(object.body) : undefined,
+    };
+  },
+
+  toJSON(message: CaptureEventPacket): unknown {
+    const obj: any = {};
+    if (message.timestamp !== 0) {
+      obj.timestamp = Math.round(message.timestamp);
+    }
+    if (message.actorId !== 0) {
+      obj.actorId = Math.round(message.actorId);
+    }
+    if (message.handshake !== undefined) {
+      obj.handshake = ClientHandshake.toJSON(message.handshake);
+    }
+    if (message.body !== undefined) {
+      obj.body = BodyLandmarks.toJSON(message.body);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CaptureEventPacket>, I>>(base?: I): CaptureEventPacket {
+    return CaptureEventPacket.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CaptureEventPacket>, I>>(object: I): CaptureEventPacket {
+    const message = createBaseCaptureEventPacket();
+    message.timestamp = object.timestamp ?? 0;
+    message.actorId = object.actorId ?? 0;
+    message.handshake = (object.handshake !== undefined && object.handshake !== null)
+      ? ClientHandshake.fromPartial(object.handshake)
+      : undefined;
+    message.body = (object.body !== undefined && object.body !== null)
+      ? BodyLandmarks.fromPartial(object.body)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseProtoVector3(): ProtoVector3 {
+  return { x: 0, y: 0, z: 0 };
+}
+
+export const ProtoVector3: MessageFns<ProtoVector3> = {
+  encode(message: ProtoVector3, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.x !== 0) {
+      writer.uint32(13).float(message.x);
+    }
+    if (message.y !== 0) {
+      writer.uint32(21).float(message.y);
+    }
+    if (message.z !== 0) {
+      writer.uint32(29).float(message.z);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProtoVector3 {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseProtoVector3();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 13) {
+              break;
+            }
+
+            message.x = reader.float();
+            continue;
+          }
+          case 2: {
+            if (tag !== 21) {
+              break;
+            }
+
+            message.y = reader.float();
+            continue;
+          }
+          case 3: {
+            if (tag !== 29) {
+              break;
+            }
+
+            message.z = reader.float();
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): ProtoVector3 {
+    return {
+      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
+      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
+    };
+  },
+
+  toJSON(message: ProtoVector3): unknown {
+    const obj: any = {};
     if (message.x !== 0) {
       obj.x = message.x;
     }
@@ -160,39 +417,43 @@ export const Point3D: MessageFns<Point3D> = {
     if (message.z !== 0) {
       obj.z = message.z;
     }
-    if (message.visibility !== 0) {
-      obj.visibility = message.visibility;
-    }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Point3D>, I>>(base?: I): Point3D {
-    return Point3D.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ProtoVector3>, I>>(base?: I): ProtoVector3 {
+    return ProtoVector3.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<Point3D>, I>>(object: I): Point3D {
-    const message = createBasePoint3D();
-    message.id = object.id ?? 0;
+  fromPartial<I extends Exact<DeepPartial<ProtoVector3>, I>>(object: I): ProtoVector3 {
+    const message = createBaseProtoVector3();
     message.x = object.x ?? 0;
     message.y = object.y ?? 0;
     message.z = object.z ?? 0;
-    message.visibility = object.visibility ?? 0;
     return message;
   },
 };
 
-function createBaseHandshake(): Handshake {
-  return { skeletonType: "" };
+function createBaseProtoQuaternion(): ProtoQuaternion {
+  return { x: 0, y: 0, z: 0, w: 0 };
 }
 
-export const Handshake: MessageFns<Handshake> = {
-  encode(message: Handshake, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.skeletonType !== "") {
-      writer.uint32(10).string(message.skeletonType);
+export const ProtoQuaternion: MessageFns<ProtoQuaternion> = {
+  encode(message: ProtoQuaternion, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.x !== 0) {
+      writer.uint32(13).float(message.x);
+    }
+    if (message.y !== 0) {
+      writer.uint32(21).float(message.y);
+    }
+    if (message.z !== 0) {
+      writer.uint32(29).float(message.z);
+    }
+    if (message.w !== 0) {
+      writer.uint32(37).float(message.w);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Handshake {
+  decode(input: BinaryReader | Uint8Array, length?: number): ProtoQuaternion {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
     if (previousRecursionDepth >= 100) {
@@ -201,405 +462,7 @@ export const Handshake: MessageFns<Handshake> = {
     (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
     try {
       const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseHandshake();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 10) {
-              break;
-            }
-
-            message.skeletonType = reader.string();
-            continue;
-          }
-        }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
-        }
-        reader.skip(tag & 7);
-      }
-      return message;
-    } finally {
-      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
-    }
-  },
-
-  fromJSON(object: any): Handshake {
-    return {
-      skeletonType: isSet(object.skeletonType)
-        ? globalThis.String(object.skeletonType)
-        : isSet(object.skeleton_type)
-        ? globalThis.String(object.skeleton_type)
-        : "",
-    };
-  },
-
-  toJSON(message: Handshake): unknown {
-    const obj: any = {};
-    if (message.skeletonType !== "") {
-      obj.skeletonType = message.skeletonType;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<Handshake>, I>>(base?: I): Handshake {
-    return Handshake.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Handshake>, I>>(object: I): Handshake {
-    const message = createBaseHandshake();
-    message.skeletonType = object.skeletonType ?? "";
-    return message;
-  },
-};
-
-function createBaseMocapFrame(): MocapFrame {
-  return { timestamp: 0, landmarks: [] };
-}
-
-export const MocapFrame: MessageFns<MocapFrame> = {
-  encode(message: MocapFrame, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.timestamp !== 0) {
-      writer.uint32(8).uint64(message.timestamp);
-    }
-    for (const v of message.landmarks) {
-      Point3D.encode(v!, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): MocapFrame {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
-    if (previousRecursionDepth >= 100) {
-      throw new globalThis.Error("protobuf decode recursion limit exceeded");
-    }
-    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
-    try {
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseMocapFrame();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 8) {
-              break;
-            }
-
-            message.timestamp = longToNumber(reader.uint64());
-            continue;
-          }
-          case 2: {
-            if (tag !== 18) {
-              break;
-            }
-
-            message.landmarks.push(Point3D.decode(reader, reader.uint32()));
-            continue;
-          }
-        }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
-        }
-        reader.skip(tag & 7);
-      }
-      return message;
-    } finally {
-      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
-    }
-  },
-
-  fromJSON(object: any): MocapFrame {
-    return {
-      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
-      landmarks: globalThis.Array.isArray(object?.landmarks)
-        ? object.landmarks.map((e: any) => Point3D.fromJSON(e))
-        : [],
-    };
-  },
-
-  toJSON(message: MocapFrame): unknown {
-    const obj: any = {};
-    if (message.timestamp !== 0) {
-      obj.timestamp = Math.round(message.timestamp);
-    }
-    if (message.landmarks?.length) {
-      obj.landmarks = message.landmarks.map((e) => Point3D.toJSON(e));
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<MocapFrame>, I>>(base?: I): MocapFrame {
-    return MocapFrame.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<MocapFrame>, I>>(object: I): MocapFrame {
-    const message = createBaseMocapFrame();
-    message.timestamp = object.timestamp ?? 0;
-    message.landmarks = object.landmarks?.map((e) => Point3D.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseClientMessage(): ClientMessage {
-  return { handshake: undefined, frame: undefined };
-}
-
-export const ClientMessage: MessageFns<ClientMessage> = {
-  encode(message: ClientMessage, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.handshake !== undefined) {
-      Handshake.encode(message.handshake, writer.uint32(10).fork()).join();
-    }
-    if (message.frame !== undefined) {
-      MocapFrame.encode(message.frame, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ClientMessage {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
-    if (previousRecursionDepth >= 100) {
-      throw new globalThis.Error("protobuf decode recursion limit exceeded");
-    }
-    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
-    try {
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseClientMessage();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 10) {
-              break;
-            }
-
-            message.handshake = Handshake.decode(reader, reader.uint32());
-            continue;
-          }
-          case 2: {
-            if (tag !== 18) {
-              break;
-            }
-
-            message.frame = MocapFrame.decode(reader, reader.uint32());
-            continue;
-          }
-        }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
-        }
-        reader.skip(tag & 7);
-      }
-      return message;
-    } finally {
-      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
-    }
-  },
-
-  fromJSON(object: any): ClientMessage {
-    return {
-      handshake: isSet(object.handshake) ? Handshake.fromJSON(object.handshake) : undefined,
-      frame: isSet(object.frame) ? MocapFrame.fromJSON(object.frame) : undefined,
-    };
-  },
-
-  toJSON(message: ClientMessage): unknown {
-    const obj: any = {};
-    if (message.handshake !== undefined) {
-      obj.handshake = Handshake.toJSON(message.handshake);
-    }
-    if (message.frame !== undefined) {
-      obj.frame = MocapFrame.toJSON(message.frame);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ClientMessage>, I>>(base?: I): ClientMessage {
-    return ClientMessage.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ClientMessage>, I>>(object: I): ClientMessage {
-    const message = createBaseClientMessage();
-    message.handshake = (object.handshake !== undefined && object.handshake !== null)
-      ? Handshake.fromPartial(object.handshake)
-      : undefined;
-    message.frame = (object.frame !== undefined && object.frame !== null)
-      ? MocapFrame.fromPartial(object.frame)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseBoneRotation(): BoneRotation {
-  return { boneId: 0, qx: 0, qy: 0, qz: 0, qw: 0 };
-}
-
-export const BoneRotation: MessageFns<BoneRotation> = {
-  encode(message: BoneRotation, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.boneId !== 0) {
-      writer.uint32(8).uint32(message.boneId);
-    }
-    if (message.qx !== 0) {
-      writer.uint32(21).float(message.qx);
-    }
-    if (message.qy !== 0) {
-      writer.uint32(29).float(message.qy);
-    }
-    if (message.qz !== 0) {
-      writer.uint32(37).float(message.qz);
-    }
-    if (message.qw !== 0) {
-      writer.uint32(45).float(message.qw);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): BoneRotation {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
-    if (previousRecursionDepth >= 100) {
-      throw new globalThis.Error("protobuf decode recursion limit exceeded");
-    }
-    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
-    try {
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseBoneRotation();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 8) {
-              break;
-            }
-
-            message.boneId = reader.uint32();
-            continue;
-          }
-          case 2: {
-            if (tag !== 21) {
-              break;
-            }
-
-            message.qx = reader.float();
-            continue;
-          }
-          case 3: {
-            if (tag !== 29) {
-              break;
-            }
-
-            message.qy = reader.float();
-            continue;
-          }
-          case 4: {
-            if (tag !== 37) {
-              break;
-            }
-
-            message.qz = reader.float();
-            continue;
-          }
-          case 5: {
-            if (tag !== 45) {
-              break;
-            }
-
-            message.qw = reader.float();
-            continue;
-          }
-        }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
-        }
-        reader.skip(tag & 7);
-      }
-      return message;
-    } finally {
-      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
-    }
-  },
-
-  fromJSON(object: any): BoneRotation {
-    return {
-      boneId: isSet(object.boneId)
-        ? globalThis.Number(object.boneId)
-        : isSet(object.bone_id)
-        ? globalThis.Number(object.bone_id)
-        : 0,
-      qx: isSet(object.qx) ? globalThis.Number(object.qx) : 0,
-      qy: isSet(object.qy) ? globalThis.Number(object.qy) : 0,
-      qz: isSet(object.qz) ? globalThis.Number(object.qz) : 0,
-      qw: isSet(object.qw) ? globalThis.Number(object.qw) : 0,
-    };
-  },
-
-  toJSON(message: BoneRotation): unknown {
-    const obj: any = {};
-    if (message.boneId !== 0) {
-      obj.boneId = Math.round(message.boneId);
-    }
-    if (message.qx !== 0) {
-      obj.qx = message.qx;
-    }
-    if (message.qy !== 0) {
-      obj.qy = message.qy;
-    }
-    if (message.qz !== 0) {
-      obj.qz = message.qz;
-    }
-    if (message.qw !== 0) {
-      obj.qw = message.qw;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<BoneRotation>, I>>(base?: I): BoneRotation {
-    return BoneRotation.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<BoneRotation>, I>>(object: I): BoneRotation {
-    const message = createBaseBoneRotation();
-    message.boneId = object.boneId ?? 0;
-    message.qx = object.qx ?? 0;
-    message.qy = object.qy ?? 0;
-    message.qz = object.qz ?? 0;
-    message.qw = object.qw ?? 0;
-    return message;
-  },
-};
-
-function createBaseSolverFrame(): SolverFrame {
-  return { rootX: 0, rootY: 0, rootZ: 0, bones: [], timestamp: 0 };
-}
-
-export const SolverFrame: MessageFns<SolverFrame> = {
-  encode(message: SolverFrame, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.rootX !== 0) {
-      writer.uint32(13).float(message.rootX);
-    }
-    if (message.rootY !== 0) {
-      writer.uint32(21).float(message.rootY);
-    }
-    if (message.rootZ !== 0) {
-      writer.uint32(29).float(message.rootZ);
-    }
-    for (const v of message.bones) {
-      BoneRotation.encode(v!, writer.uint32(34).fork()).join();
-    }
-    if (message.timestamp !== 0) {
-      writer.uint32(40).uint64(message.timestamp);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): SolverFrame {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
-    if (previousRecursionDepth >= 100) {
-      throw new globalThis.Error("protobuf decode recursion limit exceeded");
-    }
-    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
-    try {
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseSolverFrame();
+      const message = createBaseProtoQuaternion();
       while (reader.pos < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
@@ -608,7 +471,7 @@ export const SolverFrame: MessageFns<SolverFrame> = {
               break;
             }
 
-            message.rootX = reader.float();
+            message.x = reader.float();
             continue;
           }
           case 2: {
@@ -616,7 +479,7 @@ export const SolverFrame: MessageFns<SolverFrame> = {
               break;
             }
 
-            message.rootY = reader.float();
+            message.y = reader.float();
             continue;
           }
           case 3: {
@@ -624,23 +487,15 @@ export const SolverFrame: MessageFns<SolverFrame> = {
               break;
             }
 
-            message.rootZ = reader.float();
+            message.z = reader.float();
             continue;
           }
           case 4: {
-            if (tag !== 34) {
+            if (tag !== 37) {
               break;
             }
 
-            message.bones.push(BoneRotation.decode(reader, reader.uint32()));
-            continue;
-          }
-          case 5: {
-            if (tag !== 40) {
-              break;
-            }
-
-            message.timestamp = longToNumber(reader.uint64());
+            message.w = reader.float();
             continue;
           }
         }
@@ -655,58 +510,241 @@ export const SolverFrame: MessageFns<SolverFrame> = {
     }
   },
 
-  fromJSON(object: any): SolverFrame {
+  fromJSON(object: any): ProtoQuaternion {
     return {
-      rootX: isSet(object.rootX)
-        ? globalThis.Number(object.rootX)
-        : isSet(object.root_x)
-        ? globalThis.Number(object.root_x)
-        : 0,
-      rootY: isSet(object.rootY)
-        ? globalThis.Number(object.rootY)
-        : isSet(object.root_y)
-        ? globalThis.Number(object.root_y)
-        : 0,
-      rootZ: isSet(object.rootZ)
-        ? globalThis.Number(object.rootZ)
-        : isSet(object.root_z)
-        ? globalThis.Number(object.root_z)
-        : 0,
-      bones: globalThis.Array.isArray(object?.bones) ? object.bones.map((e: any) => BoneRotation.fromJSON(e)) : [],
-      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
+      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
+      w: isSet(object.w) ? globalThis.Number(object.w) : 0,
     };
   },
 
-  toJSON(message: SolverFrame): unknown {
+  toJSON(message: ProtoQuaternion): unknown {
     const obj: any = {};
-    if (message.rootX !== 0) {
-      obj.rootX = message.rootX;
+    if (message.x !== 0) {
+      obj.x = message.x;
     }
-    if (message.rootY !== 0) {
-      obj.rootY = message.rootY;
+    if (message.y !== 0) {
+      obj.y = message.y;
     }
-    if (message.rootZ !== 0) {
-      obj.rootZ = message.rootZ;
+    if (message.z !== 0) {
+      obj.z = message.z;
     }
-    if (message.bones?.length) {
-      obj.bones = message.bones.map((e) => BoneRotation.toJSON(e));
-    }
-    if (message.timestamp !== 0) {
-      obj.timestamp = Math.round(message.timestamp);
+    if (message.w !== 0) {
+      obj.w = message.w;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<SolverFrame>, I>>(base?: I): SolverFrame {
-    return SolverFrame.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ProtoQuaternion>, I>>(base?: I): ProtoQuaternion {
+    return ProtoQuaternion.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<SolverFrame>, I>>(object: I): SolverFrame {
-    const message = createBaseSolverFrame();
-    message.rootX = object.rootX ?? 0;
-    message.rootY = object.rootY ?? 0;
-    message.rootZ = object.rootZ ?? 0;
-    message.bones = object.bones?.map((e) => BoneRotation.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<ProtoQuaternion>, I>>(object: I): ProtoQuaternion {
+    const message = createBaseProtoQuaternion();
+    message.x = object.x ?? 0;
+    message.y = object.y ?? 0;
+    message.z = object.z ?? 0;
+    message.w = object.w ?? 0;
+    return message;
+  },
+};
+
+function createBaseBodyFrame(): BodyFrame {
+  return { rootPosition: undefined, boneRotations: [] };
+}
+
+export const BodyFrame: MessageFns<BodyFrame> = {
+  encode(message: BodyFrame, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.rootPosition !== undefined) {
+      ProtoVector3.encode(message.rootPosition, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.boneRotations) {
+      ProtoQuaternion.encode(v!, writer.uint32(50).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BodyFrame {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseBodyFrame();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 10) {
+              break;
+            }
+
+            message.rootPosition = ProtoVector3.decode(reader, reader.uint32());
+            continue;
+          }
+          case 6: {
+            if (tag !== 50) {
+              break;
+            }
+
+            message.boneRotations.push(ProtoQuaternion.decode(reader, reader.uint32()));
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): BodyFrame {
+    return {
+      rootPosition: isSet(object.rootPosition)
+        ? ProtoVector3.fromJSON(object.rootPosition)
+        : isSet(object.root_position)
+        ? ProtoVector3.fromJSON(object.root_position)
+        : undefined,
+      boneRotations: globalThis.Array.isArray(object?.boneRotations)
+        ? object.boneRotations.map((e: any) => ProtoQuaternion.fromJSON(e))
+        : globalThis.Array.isArray(object?.bone_rotations)
+        ? object.bone_rotations.map((e: any) => ProtoQuaternion.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BodyFrame): unknown {
+    const obj: any = {};
+    if (message.rootPosition !== undefined) {
+      obj.rootPosition = ProtoVector3.toJSON(message.rootPosition);
+    }
+    if (message.boneRotations?.length) {
+      obj.boneRotations = message.boneRotations.map((e) => ProtoQuaternion.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BodyFrame>, I>>(base?: I): BodyFrame {
+    return BodyFrame.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BodyFrame>, I>>(object: I): BodyFrame {
+    const message = createBaseBodyFrame();
+    message.rootPosition = (object.rootPosition !== undefined && object.rootPosition !== null)
+      ? ProtoVector3.fromPartial(object.rootPosition)
+      : undefined;
+    message.boneRotations = object.boneRotations?.map((e) => ProtoQuaternion.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseRigUpdatePacket(): RigUpdatePacket {
+  return { timestamp: 0, actorId: 0, body: undefined };
+}
+
+export const RigUpdatePacket: MessageFns<RigUpdatePacket> = {
+  encode(message: RigUpdatePacket, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.timestamp !== 0) {
+      writer.uint32(8).uint64(message.timestamp);
+    }
+    if (message.actorId !== 0) {
+      writer.uint32(16).uint32(message.actorId);
+    }
+    if (message.body !== undefined) {
+      BodyFrame.encode(message.body, writer.uint32(50).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RigUpdatePacket {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseRigUpdatePacket();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 8) {
+              break;
+            }
+
+            message.timestamp = longToNumber(reader.uint64());
+            continue;
+          }
+          case 2: {
+            if (tag !== 16) {
+              break;
+            }
+
+            message.actorId = reader.uint32();
+            continue;
+          }
+          case 6: {
+            if (tag !== 50) {
+              break;
+            }
+
+            message.body = BodyFrame.decode(reader, reader.uint32());
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): RigUpdatePacket {
+    return {
+      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+      actorId: isSet(object.actorId)
+        ? globalThis.Number(object.actorId)
+        : isSet(object.actor_id)
+        ? globalThis.Number(object.actor_id)
+        : 0,
+      body: isSet(object.body) ? BodyFrame.fromJSON(object.body) : undefined,
+    };
+  },
+
+  toJSON(message: RigUpdatePacket): unknown {
+    const obj: any = {};
+    if (message.timestamp !== 0) {
+      obj.timestamp = Math.round(message.timestamp);
+    }
+    if (message.actorId !== 0) {
+      obj.actorId = Math.round(message.actorId);
+    }
+    if (message.body !== undefined) {
+      obj.body = BodyFrame.toJSON(message.body);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RigUpdatePacket>, I>>(base?: I): RigUpdatePacket {
+    return RigUpdatePacket.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RigUpdatePacket>, I>>(object: I): RigUpdatePacket {
+    const message = createBaseRigUpdatePacket();
     message.timestamp = object.timestamp ?? 0;
+    message.actorId = object.actorId ?? 0;
+    message.body = (object.body !== undefined && object.body !== null) ? BodyFrame.fromPartial(object.body) : undefined;
     return message;
   },
 };

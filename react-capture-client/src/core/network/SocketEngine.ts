@@ -1,5 +1,5 @@
 import { useUIStore } from "../../store/uiStore";
-import { ClientMessage } from "../../types/schema";
+import { CaptureEventPacket } from "../../types/schema";
 
 export class SocketEngine {
   private static ws: WebSocket | null = null;
@@ -16,10 +16,10 @@ export class SocketEngine {
       useUIStore.getState().setConnected(true);
 
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        const handshakeMsg = ClientMessage.create({
-          handshake: { skeletonType: "mediapipe_33" },
+        const handshakeMsg = CaptureEventPacket.create({
+          handshake: { modelName: "mediapipe_33" },
         });
-        const bytes = ClientMessage.encode(handshakeMsg).finish();
+        const bytes = CaptureEventPacket.encode(handshakeMsg).finish();
         this.ws.send(bytes);
         console.log("WS: Handshake sent");
       }
@@ -36,12 +36,10 @@ export class SocketEngine {
     };
   }
 
-  static sendFrame(frameData: any) {
+  static sendFrame(frameData: CaptureEventPacket) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const clientMsg = ClientMessage.create({
-        frame: frameData,
-      });
-      const bytes = ClientMessage.encode(clientMsg).finish();
+      const clientMsg = CaptureEventPacket.create(frameData);
+      const bytes = CaptureEventPacket.encode(clientMsg).finish();
       this.ws.send(bytes);
     }
   }

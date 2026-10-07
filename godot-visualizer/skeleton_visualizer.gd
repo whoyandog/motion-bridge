@@ -40,20 +40,21 @@ func _attach_mesh(bone_name: String) -> void:
 	attachment.add_child(mesh_instance)
 
 func _on_frame_received(frame) -> void: 
-	for i in range(frame.get_bones().size()): 
-		var bone_data = frame.get_bones()[i]
-		var rust_id = bone_data.get_bone_id()
-		
+	var bone_rotations = frame.get_bone_rotations()
+	for i in range(bone_rotations.size()): 
+		var bone_data = bone_rotations[i]
+		var rust_id = i 
+
 		if rust_to_godot_bones.has(rust_id):
 			var bone_name = rust_to_godot_bones[rust_id]
 			var bone_idx = find_bone(bone_name)
 				
 			if bone_idx != -1:
 				var q = Quaternion (
-					bone_data.get_qx(),
-					bone_data.get_qy(),
-					bone_data.get_qz(),
-					bone_data.get_qw()
+					bone_data.get_x(),
+					bone_data.get_y(),
+					bone_data.get_z(),
+					bone_data.get_w()
 				)
 
 				set_bone_pose_rotation(bone_idx, q)
