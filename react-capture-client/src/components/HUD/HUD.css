@@ -1,48 +1,118 @@
-.hud-overlay {
-  position: absolute;
+.hud {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  padding: 30px 30px 50px 30px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud header {
+  padding: 24px 24px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.8) 0%,
     rgba(0, 0, 0, 0) 100%
   );
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
 }
 
-.left-panel h1 {
-  margin: 0 0 8px 0;
+.hud header h1 {
+  margin: 0;
   font-size: 24px;
   font-weight: 800;
   text-transform: uppercase;
-  color: white;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.hud .status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.hud .status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffffff;
   line-height: 1;
 }
 
-.status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.status.online {
+.hud .status .online {
   color: #4ade80;
 }
 
-.status.offline {
+.hud .status .offline {
   color: #f87171;
 }
 
-.right-panel {
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
+.hud .fps-counter {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 18px;
   font-family: monospace;
   line-height: 1;
+}
+
+.hud .controls {
+  padding: 0 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.hud .control-tile {
+  width: 80px;
+  height: 80px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud .control-tile:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.hud .control-tile:active {
+  background: rgba(0, 0, 0, 0.28);
+  transform: scale(0.95);
+}
+
+.hud .settings-btn .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+
+.hud .settings-btn:hover .icon,
+.hud .settings-btn:active .icon {
+  transform: rotate(45deg);
 }

@@ -1,12 +1,14 @@
 import HUD from "./components/HUD";
 import PoseCapture from "./components/PoseCapture";
+import SettingsPanel from "./components/SettingsPanel";
 
 function App() {
   return (
-    <div>
+    <>
       <HUD />
-      <PoseCapture modelType="lite" />
-    </div>
+      <PoseCapture />
+      <SettingsPanel />
+    </>
   );
 }
 

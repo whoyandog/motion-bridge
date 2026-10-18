@@ -3,9 +3,15 @@ import { CaptureEventPacket } from "../../types/schema";
 
 export class SocketEngine {
   private static ws: WebSocket | null = null;
+  private static lastControlPacket: CaptureEventPacket | null = null;
 
   static connect(url: string) {
-    if (this.ws?.readyState === WebSocket.OPEN) return;
+    if (
+      this.ws?.readyState === WebSocket.OPEN ||
+      this.ws?.readyState === WebSocket.CONNECTING
+    ) {
+      return;
+    }
 
     console.log(`Подключение к ${url}...`);
     this.ws = new WebSocket(url);
@@ -15,13 +21,8 @@ export class SocketEngine {
       console.log("WS: connected");
       useUIStore.getState().setConnected(true);
 
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        const handshakeMsg = CaptureEventPacket.create({
-          handshake: { modelName: "mediapipe_33" },
-        });
-        const bytes = CaptureEventPacket.encode(handshakeMsg).finish();
-        this.ws.send(bytes);
-        console.log("WS: Handshake sent");
+      if (this.lastControlPacket) {
+        this.sendPacket(this.lastControlPacket);
       }
     };
 
@@ -36,10 +37,14 @@ export class SocketEngine {
     };
   }
 
-  static sendFrame(frameData: CaptureEventPacket) {
+  static sendControlPacket(controlPacket: CaptureEventPacket) {
+    this.lastControlPacket = controlPacket;
+    this.sendPacket(controlPacket);
+  }
+
+  static sendPacket(packet: CaptureEventPacket) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const clientMsg = CaptureEventPacket.create(frameData);
-      const bytes = CaptureEventPacket.encode(clientMsg).finish();
+      const bytes = CaptureEventPacket.encode(packet).finish();
       this.ws.send(bytes);
     }
   }
