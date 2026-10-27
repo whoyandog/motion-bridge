@@ -1,5 +1,5 @@
 {
-  "name": "react-capture-client",
+  "name": "capture-web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proto": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/types --ts_proto_opt=esModuleInterop=true -I../proto ../proto/schema.proto"
+    "proto": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/types --ts_proto_opt=esModuleInterop=true -I../../proto ../../proto/schema.proto"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.0.1",
