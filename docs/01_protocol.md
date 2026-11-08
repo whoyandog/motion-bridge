@@ -17,16 +17,17 @@
 **10-15** - объекты и окружение, а также дополнительный резерв в случае нехватки основного протокола.
 
 Пример:
-`1: timestamp`
-`2: actor_id`
-`3: handshake`
-`4: status`
-`5: config`
-`6: body`
-`7: left_hand`
-`8: right_hand`
-`9: face`
-`10: props`
+
+- `1: timestamp`
+- `2: actor_id`
+- `3: handshake`
+- `4: status`
+- `5: config`
+- `6: body`
+- `7: left_hand`
+- `8: right_hand`
+- `9: face`
+- `10: props`
 
 > Важно не превышать диапазон 1-15, чтобы не выйти за размер более 1 байта.
 
