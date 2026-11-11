@@ -5,11 +5,11 @@ pub mod motion_bridge_schema {
 mod network;
 mod solver;
 
-use tokio::sync::watch;
+use tokio::sync::{mpsc, watch};
 
 #[tokio::main]
 async fn main() {
-    let (tx_raw, rx_raw) = watch::channel(None);
+    let (tx_raw, rx_raw) = mpsc::channel(16);
     let (tx_solved, rx_solved) = watch::channel(None);
 
     tokio::spawn(async move {

@@ -1,5 +1,6 @@
 use crate::motion_bridge_schema;
 use crate::motion_bridge_schema::capture_event_packet::Payload;
+use crate::solver::types::SolverEvent;
 use axum::{
     Router,
     extract::{
@@ -10,18 +11,12 @@ use axum::{
 };
 use futures::stream::StreamExt;
 use prost::Message as ProstMessage;
-use std::sync::Arc;
-use tokio::sync::watch;
+use tokio::sync::mpsc;
 
-type SharedState = Arc<watch::Sender<Option<motion_bridge_schema::CaptureEventPacket>>>;
+type SharedState = mpsc::Sender<SolverEvent>;
 
-pub fn create_router(
-    tx: watch::Sender<Option<motion_bridge_schema::CaptureEventPacket>>,
-) -> Router {
-    let state = Arc::new(tx);
-    Router::new()
-        .route("/ws", get(ws_handler))
-        .with_state(state)
+pub fn create_router(tx: mpsc::Sender<SolverEvent>) -> Router {
+    Router::new().route("/ws", get(ws_handler)).with_state(tx)
 }
 
 async fn ws_handler(
@@ -32,29 +27,39 @@ async fn ws_handler(
 }
 
 async fn handle_socket(mut socket: WebSocket, tx: SharedState) {
-    println!("Клиент подключен по WS (TCP)");
+    println!("[WS] Клиент подключен по WS (TCP)");
 
     while let Some(Ok(msg)) = socket.next().await {
         match msg {
-            Message::Binary(bytes) => match motion_bridge_schema::CaptureEventPacket::decode(bytes)
-            {
-                Ok(event) => match event.payload {
-                    Some(Payload::Handshake(handshake)) => {
-                        println!("Получен handshake, тип скелета: {}", handshake.model_name);
+            Message::Binary(bytes) => {
+                match motion_bridge_schema::CaptureEventPacket::decode(bytes) {
+                    Ok(event) => match event.payload {
+                        Some(Payload::Handshake(handshake)) => {
+                            println!("[WS] Handshake: {}", handshake.model_name);
+                            let _ = tx
+                                .send(SolverEvent::Handshake {
+                                    model_name: handshake.model_name,
+                                })
+                                .await;
+                        }
+                        Some(Payload::Body(body)) => {
+                            let _ = tx.try_send(SolverEvent::BodyFrame {
+                                timestamp: event.timestamp,
+                                actor_id: event.actor_id,
+                                landmarks_data: body.landmarks_data,
+                            });
+                        }
+                        None => {
+                            eprintln!("[WS] Пустое сообщение или нет payload");
+                        }
+                    },
+                    Err(e) => {
+                        eprintln!("[WS] Ошибка парсига protobuf: {}", e);
                     }
-                    Some(Payload::Body(ref _body)) => {
-                        let _ = tx.send(Some(event));
-                    }
-                    None => {
-                        eprintln!("Получено пустое сообщение (payload отсутствует)");
-                    }
-                },
-                Err(e) => {
-                    eprintln!("Ошибка парсига protobuf: {}", e);
                 }
-            },
+            }
             Message::Close(_) => {
-                println!("Клиент отключен");
+                println!("[WS] Клиент отключен");
                 break;
             }
             _ => {}
